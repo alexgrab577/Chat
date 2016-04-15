@@ -1,0 +1,51 @@
+  var socket = io();
+  
+  	// on connection to server, ask for user's name with an anonymous callback
+	socket.on('connect', function(){
+		// call the server-side function 'adduser' and send one parameter (value of prompt)
+		socket.emit('adduser', prompt("What's your name?"));
+	});
+  
+  socket.on('chat', function(msg){
+      $('#messages').append($('<li>').text(msg));
+  });
+  socket.on('personConnectStatus', function(msg){
+      $('#messages').append($('<li>').text(msg));
+  });
+ 
+ 
+  $('#submit').submit(function(){
+    socket.emit('chat message', $('#m').val());
+    $('#m').val('');
+    return false;
+  });
+  $('#nameBox button').click(function(){
+    user = $('#personName').val();
+    socket.emit('add', $('#personName').val());
+    $('#personName').val('');
+    $('#submit').css('display','inline');
+    $('#nameBox').css('display','none');
+  });
+  
+  
+  
+  
+  
+  
+  io.on('connection', function(socket){
+  socket.on('chat message', function(msg){
+    console.log('message: ' + msg);
+    io.emit('chat',  msg);
+  });
+  
+  socket.on('add', function(name){
+      var userMessage = name + ' has connected';
+    io.emit('personConnectStatus', userMessage);
+  });
+  socket.on('disconnect', function(){
+    io.emit('removeUser');
+  });
+  
+  socket.on('disconnectName', function(name){
+    io.emit('personConnectStatus', name + ' has disconnected');
+  });

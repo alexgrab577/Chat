@@ -5,52 +5,116 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+.inputChat { background: #000; padding: 3px; width: 100%; }
       form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }      
       #messages li:nth-child(odd) { background: #eee; }
-      #nameBox { background: #000; padding: 3px; width: 100%; }
-      #submit {display:none;}
+      .themeRow {padding-top: 15px;}
+      .themeColor {text-align: center;}
+      
     </style>
   </head>
   <body>
+    <div class="dialogMenu">
+        <!--
+                  form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+            .users { position: relative; float: right; width: 150px; background: white; }
+            <div class="inputRow">
+            <label for="basic"></label>
+            <input type="text" name="name" id="nameBox" value="">
+        </div>-->
+        <div class="inputRow form-group">
+            <label for="usr">Enter your name: </label>
+            <input id="nameBox" type="text" class="form-control">
+        </div>
+
+        <div class="themeRow">
+            <label class="themeColor" for="basic">Select Your Theme: </label>
+            <select class="colorScheme">
+                <option value="white">White</option>
+                <option value="blue">Blue</option>
+                <option value="pink">Pink</option>
+                <option value="red">Red</option>
+                <option value="yellow">Yellow</option>
+                <option value="black">Black</option>
+            </select>
+        </div>
+    </div>
     <div class="container-fluid">
-        <div class="row">
+
+        <!--<div class="row">
              <div id="nameBox" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-md-10 col-sm-10 col-lg-10"><p>Enter you Name:</p><input id="personName" name="personName" type="text" /><button>Enter Name</button></div>
         </div>
+              #nameBox { background: #000; padding: 3px; width: 100%; }
+              #submit {display:none;}
+        -->
         <div class="row">
-            <ul id="messages" class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-10 col-md-10 col-sm-10 col-lg-10"></ul>
+            <div class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-8 col-md-8 col-sm-8 col-lg-8"><ul id="messages" class="list-group"></ul></div>
+            <div class="users col-xs-3 col-md-3 col-sm-3 col-lg-3">Users:
+            <ul id="userList" class="list-group"></ul></div>
         </div>
-        <div>
+        <div class="inputChat row col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-8 col-md-8 col-sm-8 col-lg-8"">
             <form id="submit"action="">
             <input id="m" autocomplete="off" /><button>Send</button>
             </form>
         </div>
     </div>
+    <link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/eggplant/jquery-ui.css">
+
     <script>
   var socket = io();
-    socket.on('chat', function(msg){
-      $('#messages').append($('<li>').text(msg));
-  });
-      socket.on('newUser', function(msg){
-      $('#messages').append($('<li>').text(msg));
-  });
+  	// on connection to server, ask for user's name with an anonymous callback
+	socket.on('connect', function(){
+		// call the server-side function 'adduser' and send one parameter (value of prompt)
+		//socket.emit('addUser', prompt("What's your name?"));
+        $( ".dialogMenu" ).dialog({
+              autoOpen: true,
+              title: "Enter Your Name",
+              modal: true,
+              height: 350,
+              width: 350,
+              buttons: [
+                            {
+                                text: "Ok",
+                                click: function() {
+                                    socket.emit('addUser', $('#nameBox').val())
+                                    $( this ).dialog( "close" );
+                                }
+                            }
+                        ],
+              closeOnEscape: false,
+              open: function(event, ui) { $(".ui-dialog-titlebar-close", ui.dialog | ui).hide(); }
+        });
+        $(".colorScheme").selectmenu({
+            icons: { button: "ui-icon-circle-triangle-s" },
+            width: 100
+            });
+	});
+	// listener, whenever the server emits 'updatechat', this updates the chat body
+	socket.on('updatechat', function (username, data) {
+		$('#messages').append('<li class=\"list-group-item\">'+username + ':</li><li class=\"list-group-item\">' + data + '</li>');
+	});
+
+	socket.on('updateusers', function (usernames) {
+        $('#userList').empty();
+        for (x in usernames) {
+                 $('#userList').append("<li class=\"list-group-item\">" + usernames[x] + "</li>");
+            }
+	});
+
   $('#submit').submit(function(){
-    socket.emit('chat message', $('#m').val());
+    socket.emit('sendchat', $('#m').val());
     $('#m').val('');
     return false;
   });
-  $('#nameBox button').click(function(){
-    socket.emit('add name', $('#personName').val());
-    $('#personName').val('');
-    $('#submit').css('display','inline');
-    $('#nameBox').css('display','none');
-  });
-
 </script>
   </body>
 </html>
