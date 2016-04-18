@@ -14,6 +14,7 @@
       .chatLog {margin-bottom: 36px;}
       .dialogMessage {display:none;}
       .users {position:fixed; top:15px; right: 15%; width: 10%;}
+      .container-fluid {padding-left: 0px !important; padding-right: 0px !important;}
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   </head>
@@ -58,13 +59,13 @@
               #submit {display:none;}
         -->
         <div class="chatLog row col-xs-12 col-md-12 col-sm-12 col-lg-12">
-            <div class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-lg-offset-1 col-xs-8 col-md-8 col-sm-8 col-lg-8"><ul id="messages" class="list-group"></ul></div>
+            <div class="col-md-offset-1 col-lg-offset-1 col-xs-12 col-md-12 col-sm-8 col-lg-8"><ul id="messages" class="list-group"></ul></div>
         </div>
          <div class="users" data-spy="affix">Users:
                 <ul id="userList" class="list-group"></ul>
             </div>
         <!--row col-xs-12 col-md-12 col-sm-12 col-lg-12-->
-        <div class="inputChat row" data-spy="affix">
+        <div class="inputChat" data-spy="affix">
             <form id="submit"action="">
             <input id="m" autocomplete="off" /><button>Send</button>
             </form>
